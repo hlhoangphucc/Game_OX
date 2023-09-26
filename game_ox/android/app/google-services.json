@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "313707140747",
+    "project_id": "flutter--app-9a72f",
+    "storage_bucket": "flutter--app-9a72f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313707140747:android:c9cf6867d3c248f92b668e",
+        "android_client_info": {
+          "package_name": "com.example.game_quiz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4iH4JlqALjIu2HaiDmbdkSayNG5V4sP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
