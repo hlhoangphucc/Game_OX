@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:game_quiz/phone.dart';
+import 'package:game_quiz/login/phone.dart';
 import 'package:pinput/pinput.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
