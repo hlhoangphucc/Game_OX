@@ -62,7 +62,7 @@ class _MyotpState extends State<Myotp> {
                                 verificationId: MyPhone.verify,
                                 smsCode: code);
                               await auth.signInWithCredential(credential);
-                              Navigator.pushNamedAndRemoveUntil(context, 'home', (route) => false);
+                              Navigator.pushNamedAndRemoveUntil(context, 'signup', (route) => false);
                             } catch (e) {
                               print('ERROR verify otp');
                             }

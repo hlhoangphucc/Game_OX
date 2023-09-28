@@ -36,7 +36,7 @@ class _welcome_pageState extends State<welcome_page> {
               
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, 'signup');
+                  Navigator.pushNamed(context, 'phone');
                 },
                 child: Text('Sign Up',style: TextStyle(fontSize: 20)),
                 style: ElevatedButton.styleFrom(

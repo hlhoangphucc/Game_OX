@@ -2,7 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:game_quiz/chat/chatservice.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'dart:math'as math;
 
+
+final String localUserID = math.Random().nextInt(10000).toString();
 class Chat_Screen extends StatefulWidget {
   final String receiverEmail;
   final String receiverId;
@@ -17,6 +21,7 @@ class _Chat_ScreenState extends State<Chat_Screen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController message_txt = TextEditingController();
   final chatservice _chatservice = chatservice();
+  bool call = false;
 
   void sendMassage() async{
     if(message_txt.text.isNotEmpty){
@@ -33,7 +38,9 @@ class _Chat_ScreenState extends State<Chat_Screen> {
         actions: [Column(
           children: [
               IconButton(onPressed: () {
-            Navigator.pushNamed(context, 'joinroom');
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>CallPge(callingID: chatservice.idroom.toString())));
+                message_txt.text = "Tôi đang gọi cho bạn";
+                sendMassage();
           }, icon: Icon(Icons.duo_outlined,size: 45,)
               ),
               SizedBox(width: 80,)
@@ -76,7 +83,6 @@ class _Chat_ScreenState extends State<Chat_Screen> {
     var alignment = (data['senderId'] == _auth.currentUser!.uid)
     ? Alignment.centerRight
     : Alignment.centerLeft;
-
     return Container(
       alignment: alignment,
       child: Padding(
@@ -124,13 +130,35 @@ class _Chat_ScreenState extends State<Chat_Screen> {
             ),
           ),
           IconButton(
-          onPressed: sendMassage, 
+          onPressed: () {
+            sendMassage();
+          }, 
           icon: const Icon(
             Icons.send_sharp,
             size: 40,
           ))
         ],
       ),
+    );
+  }
+}
+class CallPge extends StatelessWidget {
+  final String callingID;
+  const CallPge({super.key,required this.callingID});
+
+  @override
+  Widget build(BuildContext context) {
+    return  SafeArea(
+      child: ZegoUIKitPrebuiltCall(
+        appID: 1784878323, 
+        appSign: '5f59f92274995ef2aaf4cb7612bdaea2eaa511964ecc896867bc281e76c6b407', 
+        callID: callingID, 
+        userID: localUserID, 
+        userName: 'user_$localUserID', 
+        config: ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall()..onOnlySelfInRoom=(context){
+          Navigator.pop(context);
+        },
+      )
     );
   }
 }
