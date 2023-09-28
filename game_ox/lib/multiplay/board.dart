@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:game_quiz/multiplay/findmatch.dart';
 import 'package:game_quiz/singleplay/piece.dart';
 import 'package:game_quiz/singleplay/pixel.dart';
 import 'package:game_quiz/singleplay/values.dart';
@@ -46,6 +47,7 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
   @override
   void initState() {
     super.initState();
+
     startGame();
     listenToGamePairs();
     listenState();
@@ -72,26 +74,36 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
     });
   }
 
+  @override
+  void dispose() {
+    isGameLoopActive = false;
+    super.dispose();
+  }
+
   void listenToGamePairs() {
     gamePairsRef.onChildChanged.listen((event) {
-      final key = event.snapshot.key;
+      // final key = event.snapshot.key;
       final value = event.snapshot.value;
 
       if (value != null && value is Map) {
         if (value['player1'] != null) {
           // Cập nhật điểm số của người chơi 1 (Player 1)
           final player1Score = value['player1']['score'];
-          setState(() {
-            scoreP1 = player1Score;
-          });
+          if (mounted) {
+            setState(() {
+              scoreP1 = player1Score;
+            });
+          }
         }
 
         if (value['player2'] != null) {
           // Cập nhật điểm số của người chơi 2 (Player 2)
           final player2Score = value['player2']['score'];
-          setState(() {
-            scoreP2 = player2Score;
-          });
+          if (mounted) {
+            setState(() {
+              scoreP2 = player2Score;
+            });
+          }
         }
       }
     });
@@ -99,7 +111,7 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
 
   void listenState() {
     gamePairsRef.onChildChanged.listen((event) {
-      final key = event.snapshot.key;
+      // final key = event.snapshot.key;
       final value = event.snapshot.value;
 
       if (value != null && value is Map) {
@@ -107,148 +119,150 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
           final statePlayer1 = value['player1']['state'];
           final player1Score = value['player1']['score'];
           final player1Email = value['player1']['email'];
-          setState(() {
-            stateP1 = statePlayer1;
-            scoreP1 = player1Score;
-            emailP1 = player1Email;
-          });
+          if (mounted) {
+            setState(() {
+              stateP1 = statePlayer1;
+              scoreP1 = player1Score;
+              emailP1 = player1Email;
+            });
+          }
         }
 
         if (value['player2'] != null) {
           final statePlayer2 = value['player2']['state'];
           final player2Score = value['player2']['score'];
           final player2Email = value['player2']['email'];
-          setState(() {
-            stateP2 = statePlayer2;
-            scoreP2 = player2Score;
-            emailP2 = player2Email;
-          });
+          if (mounted) {
+            setState(() {
+              stateP2 = statePlayer2;
+              scoreP2 = player2Score;
+              emailP2 = player2Email;
+            });
+          }
         }
-        if (stateP1 == stateP2) {
+        if (stateP1 == 'gameover' && stateP2 == 'gameover') {
           if (scoreP1 > scoreP2) {
             if (emailP2 == email) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Kết Thúc'),
-                  content: Row(
-                    children: [
-                      Text('Your Lose!!'),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => homePage()),
-                        );
-                        Navigator.pop(context);
-                      },
-                      child: Text('Wait'),
-                    ),
-                  ],
-                ),
-              );
+              checkPlayerLose();
             } else if (emailP1 == email) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Kết Thúc'),
-                  content: Row(
-                    children: [
-                      Text('Your Win!!'),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => homePage()),
-                        );
-            
-                      },
-                      child: Text('Wait'),
-                    ),
-                  ],
-                ),
-              );
+              checkPlayWin();
+            }
+          } else if (scoreP1 < scoreP2) {
+            if (emailP2 == email) {
+              checkPlayWin();
+            } else if (emailP1 == email) {
+              checkPlayerLose();
             }
           } else {
-            if (emailP2 == email) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Kết Thúc'),
-                  content: Row(
-                    children: [
-                      Text('Your Win!!'),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => homePage()),
-                        );
-                      },
-                      child: Text('Wait'),
-                    ),
-                  ],
-                ),
-              );
-            } else if (emailP1 == email) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Kết Thúc'),
-                  content: Row(
-                    children: [
-                      Text('Your Lose!!'),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => homePage()),
-                        );
-                        Navigator.pop(context);
-                      },
-                      child: Text('Wait'),
-                    ),
-                  ],
-                ),
-              );
-            }
+            checkPlayerdickens();
           }
-        } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Thông Báo'),
-              content: Row(
-                children: [
-                  Text('Đợi người chơi còn lại'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  },
-                  child: Text('Đợi'),
-                ),
-              ],
-            ),
-          );
         }
       }
     });
+  }
+
+  void deleteNodeAfterPlay() {
+    DatabaseReference gamePairsRef =
+        FirebaseDatabase.instance.reference().child('game_pairs');
+    gamePairsRef.once().then((DatabaseEvent snap) {
+      final data = snap.snapshot.value;
+      if (data != null && data is Map) {
+        data.forEach((key, value) {
+          if (value['player1']['email'] == email ||
+              value['player2']['email'] == email) {
+            gamePairsRef.child(key).remove();
+          }
+        });
+      }
+    });
+  }
+
+  void checkPlayerLose() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Kết Thúc'),
+        content: Row(
+          children: [
+            Text('Your Lose!!'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              GameStatus().isPairing = false;
+              deleteNodeAfterPlay();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => homePage()),
+                (route) => false,
+              );
+              resetGame();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void checkPlayWin() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Kết Thúc'),
+        content: Row(
+          children: [
+            Text('Your Win!!'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              GameStatus().isPairing = false;
+              deleteNodeAfterPlay();
+              resetGame();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => homePage()),
+                (route) => false,
+              );
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void checkPlayerdickens() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Kết Thúc'),
+        content: Row(
+          children: [
+            Text('You two have equal points'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              GameStatus().isPairing = false;
+              deleteNodeAfterPlay();
+              resetGame();
+              Navigator.pop(context);
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => homePage()),
+                (route) => false,
+              );
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   void fetchGameData(String userEmail) {
@@ -389,7 +403,7 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
         if (gameOver) {
           timer.cancel();
           updateGameState('gameover');
-          showGameOVerDiaLog();
+          // showGameOVerDiaLog();
           isGameLoopActive = false;
         }
         currentPiece.movePiece(Direction.down);
@@ -397,34 +411,28 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
     });
   }
 
-  @override
-  void dispose() {
-    isGameLoopActive = false;
-    super.dispose();
-  }
-
-  void showGameOVerDiaLog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Kết Thúc'),
-        content: Row(
-          children: [
-            Text('Your score is: ' + scoreP1.toString()),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _updateHighScore(currentScore);
-              Navigator.pop(context);
-            },
-            child: Text('Wait'),
-          ),
-        ],
-      ),
-    );
-  }
+  // void showGameOVerDiaLog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: Text('Kết Thúc'),
+  //       content: Row(
+  //         children: [
+  //           Text('Your score is: ' + scoreP1.toString()),
+  //         ],
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             _updateHighScore(currentScore);
+  //             Navigator.pop(context);
+  //           },
+  //           child: Text('Wait'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void resetGame() {
     gameBoard = List.generate(
@@ -603,13 +611,14 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
                                       ),
                                       TextButton(
                                         onPressed: () {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    homePage()),
-                                          );
                                           Navigator.pop(context);
+                                          Navigator.pushAndRemoveUntil(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      homePage()),
+                                              (route) => false);
+                                          resetGame();
                                         },
                                         child: const Text('Có'),
                                       ),

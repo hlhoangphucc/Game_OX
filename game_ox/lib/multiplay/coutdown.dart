@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:game_quiz/multiplay/board.dart';
+import 'package:game_quiz/multiplay/findmatch.dart';
 
 class CountdownScreen extends StatefulWidget {
   final String email;
@@ -46,12 +48,28 @@ class _CountdownScreenState extends State<CountdownScreen> {
   void _startCountdown() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
-        if (_seconds > 0) {
+        if (_seconds > 0 && GameStatus().isPairing == false) {
           _seconds--;
         } else {
-          // Đếm ngược đã hoàn thành, điều hướng về màn hình trước đó
-          removeFromWaitingList(widget.email);
-          Navigator.pop(context);
+          if (GameStatus().isPairing == false) {
+            removeFromWaitingList(widget.email);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WaitingListScreen(),
+              ),
+              (route) => false,
+            );
+          } else {
+            // Chuyển hướng sang màn hình GameScreen
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GamePuzMultiPlayer(),
+              ),
+              (route) => false,
+            );
+          }
           _timer.cancel();
         }
       });

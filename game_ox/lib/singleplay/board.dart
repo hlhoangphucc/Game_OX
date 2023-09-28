@@ -53,6 +53,7 @@ class _GamePuzState extends State<GamePuz> {
   }
 
   void _updateHighScore(int newHighScore) {
+    // ignore: unnecessary_null_comparison
     if (_database != null) {
       _database.update({'HighScore': newHighScore}).then((_) {
         print('Điểm số cao nhất đã được cập nhật thành công');
@@ -309,6 +310,7 @@ class _GamePuzState extends State<GamePuz> {
                                                 builder: (context) =>
                                                     homePage(),
                                               ));
+                                          resetGame();
                                         },
                                         child: const Text('Có'),
                                       ),

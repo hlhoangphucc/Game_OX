@@ -130,12 +130,10 @@ class _homePage extends State<homePage> {
                           ),
                           child: TextButton(
                             onPressed: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
+                              Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
-                                  builder: (context) => GamePuz(),
+                                  builder: (context) => GamePuzMultiPlayer(),
                                 ),
-                                (route) => false,
                               );
                             },
                             child: Text(

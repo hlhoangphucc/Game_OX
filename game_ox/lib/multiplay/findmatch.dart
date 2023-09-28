@@ -1,9 +1,20 @@
-import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:game_quiz/multiplay/board.dart';
 import 'package:game_quiz/multiplay/coutdown.dart';
+
+class GameStatus {
+  bool isPairing = false;
+
+  static final GameStatus _singleton = GameStatus._internal();
+
+  factory GameStatus() {
+    return _singleton;
+  }
+
+  GameStatus._internal();
+}
 
 class WaitingListScreen extends StatefulWidget {
   @override
@@ -20,7 +31,7 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
   List<bool> eventStates = [];
   String id = '';
   String email = '';
-  int n = 0;
+
   @override
   void initState() {
     super.initState();
@@ -55,10 +66,13 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
         eventStates[0] = true;
       }
 
+      // ignore: unnecessary_null_comparison
       if (event.snapshot != null &&
-          event.snapshot.value is Map<dynamic, dynamic>) {
+          event.snapshot.value is Map<dynamic, dynamic> &&
+          mounted) {
         final dynamic value = event.snapshot.value;
         Map<dynamic, dynamic> waitingListData = value;
+        // ignore: unnecessary_null_comparison
         if (waitingListData != null) {
           setState(() {
             waitingList.clear();
@@ -69,20 +83,23 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
           });
           if (waitingList.length >= 2) {
             String player1 = email.toString();
-            String player2 = waitingList[n];
+            String player2 = '';
 
-            if (player1 != player2) {
+            for (int i = 0; i < waitingList.length; i++) {
+              if (waitingList[i] != player1) {
+                player2 = waitingList[i];
+                break;
+              }
+            }
+            if (player2.isNotEmpty) {
               createGamePair(player1, player2);
               isPairCreated = true;
+              GameStatus().isPairing = true;
               removeFromWaitingList(player1);
               removeFromWaitingList(player2);
             } else {
-              print('Hai người chơi giống nhau.');
+              print('Không tìm thấy người chơi khác.');
             }
-            n++;
-          }
-          if (n >= waitingList.length) {
-            n = 0;
           }
         }
       } else {
@@ -150,6 +167,7 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
         child: Center(
           child: ElevatedButton(
             onPressed: () {
+              // ignore: unused_local_variable
               String userEmail = email;
               addToWaitingList(email);
               Navigator.push(
