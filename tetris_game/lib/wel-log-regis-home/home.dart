@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:game_quiz/multiplay/board.dart';
 import 'package:game_quiz/multiplay/findmatch.dart';
 import 'package:game_quiz/ratings/ratings.dart';
-import 'package:game_quiz/singleplay/board.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:game_quiz/wel-log-regis-home/login.dart';
 
