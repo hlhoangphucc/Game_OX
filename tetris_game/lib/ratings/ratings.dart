@@ -17,26 +17,28 @@ class _RankScreen extends State<RankScreen> {
   void initState() {
     super.initState();
     _databaseRef = FirebaseDatabase.instance.reference().child('users');
+    setState(() {
+      highScores.clear();
+    });
 
     // Lắng nghe sự kiện khi có thay đổi dữ liệu
     _databaseRef.onValue.listen((event) {
       final dynamic data = event.snapshot.value;
       if (data != null && data is Map<dynamic, dynamic>) {
-        // Xóa danh sách highScores cũ
         setState(() {
           highScores.clear();
         });
 
-        // Dữ liệu trả về là một Map, trong đó key là ID người dùng và value là điểm số cao nhất
         Map<dynamic, dynamic> userData = data;
-
-        // Duyệt qua từng cặp key-value trong Map và thêm vào danh sách highScores
         userData.forEach((key, value) {
           setState(() {
             highScores
                 .add({'name': value['email'], 'highScore': value['HighScore']});
           });
         });
+
+        // Sắp xếp danh sách highScores theo high score từ cao đến thấp
+        highScores.sort((a, b) => b['highScore'].compareTo(a['highScore']));
       }
     });
   }
@@ -106,7 +108,7 @@ class _RankScreen extends State<RankScreen> {
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.grey
-                                      .withOpacity(1), // Shadow color
+                                      .withOpacity(0.8), // Shadow color
                                   spreadRadius: 5, // Spread radius
                                   blurRadius: 7, // Blur radius
                                   offset: Offset(0, 3), // Shadow offset

@@ -65,7 +65,6 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
       if (!eventStates[0] && !isPairCreated) {
         eventStates[0] = true;
       }
-
       // ignore: unnecessary_null_comparison
       if (event.snapshot != null &&
           event.snapshot.value is Map<dynamic, dynamic> &&
@@ -84,7 +83,7 @@ class _WaitingListScreenState extends State<WaitingListScreen> {
           if (waitingList.length >= 2) {
             String player1 = email.toString();
             String player2 = '';
-
+          
             for (int i = 0; i < waitingList.length; i++) {
               if (waitingList[i] != player1) {
                 player2 = waitingList[i];

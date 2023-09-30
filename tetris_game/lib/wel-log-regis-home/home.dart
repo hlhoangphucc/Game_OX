@@ -4,6 +4,7 @@ import 'package:game_quiz/multiplay/board.dart';
 import 'package:game_quiz/multiplay/findmatch.dart';
 import 'package:game_quiz/ratings/ratings.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:game_quiz/singleplay/board.dart';
 import 'package:game_quiz/wel-log-regis-home/login.dart';
 
 class homePage extends StatefulWidget {
@@ -30,8 +31,7 @@ class _homePage extends State<homePage> {
             .child('users/${id}/HighScore');
         _database.onValue.listen((event) {
           final dynamic value = event.snapshot.value;
-          if (value != null) {
-            // Ensure the value is not null before updating highscore
+          if (value != null && mounted) {
             setState(() {
               highscore = value;
             });
@@ -58,7 +58,6 @@ class _homePage extends State<homePage> {
     }
   }
 
-  String default_img = 'images/amthah.png';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,7 +130,7 @@ class _homePage extends State<homePage> {
                             onPressed: () {
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
-                                  builder: (context) => GamePuzMultiPlayer(),
+                                  builder: (context) => GamePuz(),
                                 ),
                               );
                             },
@@ -165,7 +164,7 @@ class _homePage extends State<homePage> {
                               );
                             },
                             child: Text(
-                              'Đấu Trường',
+                              'Chơi Online',
                               style: TextStyle(
                                 fontSize:
                                     MediaQuery.of(context).size.width / 15,

@@ -53,12 +53,32 @@ class _GamePuzState extends State<GamePuz> {
   }
 
   void _updateHighScore(int newHighScore) {
-    // ignore: unnecessary_null_comparison
+    // Kiểm tra nếu _database đã được khởi tạo
     if (_database != null) {
-      _database.update({'HighScore': newHighScore}).then((_) {
-        print('Điểm số cao nhất đã được cập nhật thành công');
+      // Truy xuất giá trị hiện tại của HighScore từ Firebase
+      _database.once().then((DatabaseEvent snap) {
+        final data = snap.snapshot.value;
+
+        if (data != null && data is Map) {
+          // Lấy giá trị hiện tại của HighScore từ tài liệu Firebase
+          final currentHighScore = data['HighScore'] ?? 0;
+
+          // So sánh với newHighScore
+          if (newHighScore > currentHighScore) {
+            // Nếu newHighScore lớn hơn, thì cập nhật
+            _database.update({'HighScore': newHighScore}).then((_) {
+              print('Điểm số cao nhất đã được cập nhật thành công');
+            }).catchError((error) {
+              print('Lỗi khi cập nhật điểm số cao nhất: $error');
+            });
+          } else {
+            print('Không cần cập nhật điểm số cao nhất.');
+          }
+        } else {
+          print('Tài liệu HighScore không tồn tại trên Firebase.');
+        }
       }).catchError((error) {
-        print('Lỗi khi cập nhật điểm số cao nhất: $error');
+        print('Lỗi khi truy xuất tài liệu Firebase: $error');
       });
     } else {
       print('Database reference is not initialized yet.');
@@ -115,11 +135,25 @@ class _GamePuzState extends State<GamePuz> {
         actions: [
           TextButton(
             onPressed: () {
-              resetGame();
               _updateHighScore(currentScore);
+              resetGame();
               Navigator.pop(context);
             },
             child: Text('Play Again'),
+          ),
+          TextButton(
+            onPressed: () {
+              _updateHighScore(currentScore);
+
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => homePage(),
+                  ),
+                  (route) => false);
+              resetGame();
+            },
+            child: Text('Thoát'),
           ),
         ],
       ),

@@ -157,6 +157,21 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
             checkPlayerdickens();
           }
         }
+        // if (stateP1 == 'gameover' || stateP2 == 'gameover') {
+        //   if (stateP1 == 'gameover') {
+        //     if (emailP1 == email) {
+        //       checkPlayerLoseOut();
+        //     } else if (emailP1 != email) {
+        //       checkPlayWin();
+        //     }
+        //   } else if (stateP2 == 'gameover') {
+        //     if (emailP2 == email) {
+        //       checkPlayerLoseOut();
+        //     } else if (emailP2 != email) {
+        //       checkPlayWin();
+        //     }
+        //   }
+        // }
       }
     });
   }
@@ -192,6 +207,34 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
             onPressed: () {
               GameStatus().isPairing = false;
               deleteNodeAfterPlay();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => homePage()),
+                (route) => false,
+              );
+              resetGame();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void checkPlayerLoseOut() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Kết Thúc'),
+        content: Row(
+          children: [
+            Text('Your Lose!!'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              GameStatus().isPairing = false;
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => homePage()),
@@ -411,29 +454,6 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
     });
   }
 
-  // void showGameOVerDiaLog() {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: Text('Kết Thúc'),
-  //       content: Row(
-  //         children: [
-  //           Text('Your score is: ' + scoreP1.toString()),
-  //         ],
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () {
-  //             _updateHighScore(currentScore);
-  //             Navigator.pop(context);
-  //           },
-  //           child: Text('Wait'),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   void resetGame() {
     gameBoard = List.generate(
         columLength, (i) => List.generate(rowLength, (j) => null));
@@ -558,122 +578,128 @@ class _GamePuzMultiPlayerState extends State<GamePuzMultiPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
-        backgroundColor: Colors.black,
-        body: Column(
-          children: [
-            Expanded(
-              child: GridView.builder(
-                  itemCount: rowLength * columLength,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: rowLength),
-                  itemBuilder: (context, index) {
-                    int row = (index / rowLength).floor();
-                    int col = index % rowLength;
-                    if (currentPiece.position.contains(index)) {
-                      return Pixel(color: Colors.yellow);
-                    } else if (gameBoard[row][col] != null) {
-                      final Tetromino? tetrominoType = gameBoard[row][col];
-                      return Pixel(color: tetrominoColors[tetrominoType]);
-                    } else {
-                      return Pixel(color: Colors.grey[900]);
-                    }
-                  }),
+      backgroundColor: Colors.black,
+      body: Column(
+        children: [
+          Expanded(
+            child: GridView.builder(
+              itemCount: rowLength * columLength,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: rowLength,
+              ),
+              itemBuilder: (context, index) {
+                int row = (index / rowLength).floor();
+                int col = index % rowLength;
+                if (currentPiece.position.contains(index)) {
+                  return Pixel(color: Colors.yellow);
+                } else if (gameBoard[row][col] != null) {
+                  final Tetromino? tetrominoType = gameBoard[row][col];
+                  return Pixel(color: tetrominoColors[tetrominoType]);
+                } else {
+                  return Pixel(color: Colors.grey[900]);
+                }
+              },
             ),
-            Container(
-              height: MediaQuery.of(context).size.height / 4,
-              margin: EdgeInsets.only(right: 10, left: 10),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Transform.rotate(
-                        angle: 3.14159265359, // Góc xoay 180 độ (rad)
-                        child: IconButton(
-                          onPressed: rotatePiece,
-                          icon: IconButton(
-                            onPressed: () {
-                              showDialog<void>(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Thông Báo'),
-                                    content:
-                                        Text('Bạn có chắc muốn thoát không ? '),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('Không'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                          Navigator.pushAndRemoveUntil(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      homePage()),
-                                              (route) => false);
-                                          resetGame();
-                                        },
-                                        child: const Text('Có'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            icon: Image.asset('images/exit.png'),
-                          ),
-                          iconSize: MediaQuery.of(context).size.width / 7,
+          ),
+          Container(
+            height: screenHeight / 4,
+            margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Transform.rotate(
+                      angle: 3.14159265359,
+                      child: IconButton(
+                        onPressed: rotatePiece,
+                        icon: IconButton(
+                          onPressed: () {
+                            showDialog<void>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Thông Báo'),
+                                  content:
+                                      Text('Bạn có chắc muốn thoát không ? '),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Không'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        GameStatus().isPairing = false;
+                                        updateGameState('gameover');
+                                        Navigator.pop(context);
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => homePage()),
+                                          (route) => false,
+                                        );
+                                        resetGame();
+                                      },
+                                      child: const Text('Có'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          icon: Image.asset('images/exit.png'),
                         ),
+                        iconSize: screenWidth / 7,
                       ),
-                      Text(
-                        'Score P1: ' + scoreP1.toString(),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Text(
-                        'Score P2: ' + scoreP2.toString(),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Text(
-                        email,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        onPressed: moveLeft,
+                    ),
+                    Text(
+                      'Score P1: ' + scoreP1.toString(),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      'Score P2: ' + scoreP2.toString(),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: moveLeft,
+                      icon: Image.asset('images/move.png'),
+                      iconSize: screenWidth / 8,
+                      color: Colors.white,
+                    ),
+                    IconButton(
+                      onPressed: rotatePiece,
+                      icon: Image.asset('images/reset.png'),
+                      iconSize: screenWidth / 8,
+                      color: Colors.white,
+                    ),
+                    Transform.rotate(
+                      angle: 3.14159265359,
+                      child: IconButton(
+                        onPressed: moveRight,
                         icon: Image.asset('images/move.png'),
-                        iconSize: MediaQuery.of(context).size.width / 8,
+                        iconSize: screenWidth / 8,
                         color: Colors.white,
                       ),
-                      IconButton(
-                          onPressed: rotatePiece,
-                          icon: Image.asset('images/reset.png'),
-                          iconSize: MediaQuery.of(context).size.width / 8,
-                          color: Colors.white),
-                      Transform.rotate(
-                        angle: 3.14159265359,
-                        child: IconButton(
-                            onPressed: moveRight,
-                            icon: Image.asset('images/move.png'),
-                            iconSize: MediaQuery.of(context).size.width / 8,
-                            color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }

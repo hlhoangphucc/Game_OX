@@ -53,12 +53,11 @@ class _CountdownScreenState extends State<CountdownScreen> {
         } else {
           if (GameStatus().isPairing == false) {
             removeFromWaitingList(widget.email);
-            Navigator.pushAndRemoveUntil(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => WaitingListScreen(),
               ),
-              (route) => false,
             );
           } else {
             // Chuyển hướng sang màn hình GameScreen

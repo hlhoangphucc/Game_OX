@@ -99,40 +99,54 @@ class _LoginScreenState extends State<LoginScreen> {
                                 radius: 30,
                                 backgroundColor: Colors.green.shade600,
                                 child: IconButton(
-                                    color: Colors.black,
-                                    onPressed: () async {
-                                      try {
-                                        _auth.signInWithEmailAndPassword(
-                                            email: txtEmail.text,
-                                            password: txtPass.text);
-                                        _auth
-                                            .authStateChanges()
-                                            .listen((event) {
-                                          if (event != null) {
-                                            txtEmail.clear();
-                                            txtPass.clear();
-                                            Navigator.pushNamedAndRemoveUntil(
-                                                context,
-                                                'home',
-                                                (route) => false);
-                                          } else {
-                                            // final snackBar = SnackBar(
-                                            //     content: Text(
-                                            //         'Đăng nhập không thành công!!'));
-                                            // ScaffoldMessenger.of(context)
-                                            //     .showSnackBar(snackBar);
-                                          }
-                                        });
-                                      } catch (e) {
-                                        final snackBar = SnackBar(
-                                            content: Text('Có Lỗi Ở Sever!'));
+                                  color: Colors.black,
+                                  onPressed: () {
+                                    _auth
+                                        .signInWithEmailAndPassword(
+                                      email: txtEmail.text,
+                                      password: txtPass.text,
+                                    )
+                                        .then((userCredential) {
+                                      final User? user = userCredential.user;
+                                      if (user != null) {
+                                        txtEmail.clear();
+                                        txtPass.clear();
+                                        Navigator.pushNamedAndRemoveUntil(
+                                          context,
+                                          'home',
+                                          (route) => false,
+                                        );
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(snackBar);
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content:
+                                                Text('Đăng nhập thành công!'),
+                                          ),
+                                        );
+                                      } else {
+                                        // Hiển thị thông báo lỗi nếu người dùng là null
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'Đăng nhập không thành công! Vui lòng kiểm tra lại tài khoản và mật khẩu.'),
+                                          ),
+                                        );
                                       }
-                                    },
-                                    icon: Icon(
-                                      Icons.arrow_forward,
-                                    )),
+                                    }).catchError((error) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              'Có lỗi ở server hoặc kiểm tra lại tài khoản và mật khẩu!'),
+                                        ),
+                                      );
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.arrow_forward,
+                                  ),
+                                ),
                               )
                             ],
                           ),

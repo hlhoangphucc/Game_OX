@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:game_quiz/wel-log-regis-home/login.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -24,12 +25,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final User? user = userCredential.user;
 
       if (user != null) {
-        await _addUserDataToDatabase(user.uid, txtEmail.text, txtPass.text);
-        print('Đăng ký thành công! User ID: ${user.uid}');
+        final emailPattern = RegExp(r'[a-z]+@gmail\.com$');
+        if (!emailPattern.hasMatch(txtEmail.text)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Sai định dạng email viết bằng chữ thường'),
+            ),
+          );
+          await _auth.signOut();
+        } else {
+          await _addUserDataToDatabase(user.uid, txtEmail.text, txtPass.text);
+          print('Đăng ký thành công! User ID: ${user.uid}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Đăng ký thành công! email:' + txtEmail.text),
+            ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+          );
+        }
       }
     } catch (e) {
       // Xử lý lỗi nếu có
-      print('Lỗi đăng ký: $e');
+      if (e is FirebaseAuthException) {
+        if (e.code == 'email-already-in-use') {
+          print(
+              'Email đã tồn tại trong hệ thống. Vui lòng sử dụng email khác.');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Email đã tồn tại trong hệ thống. Vui lòng sử dụng email khác.'),
+            ),
+          );
+        } else {
+          print('Lỗi đăng ký: $e');
+        }
+      }
     }
   }
 
@@ -37,9 +70,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String uid, String email, String password) async {
     try {
       final reference = FirebaseDatabase.instance.reference().child('users');
-      await reference
-          .child(uid)
-          .set({'uid': uid, 'email': email, 'password': password});
+      await reference.child(uid).set(
+          {'uid': uid, 'email': email, 'password': password, 'HighScore': 0});
     } catch (e) {
       // Xử lý lỗi nếu có
       print('Lỗi khi thêm dữ liệu vào Firebase Realtime Database: $e');
